@@ -14,7 +14,7 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 export default class ThreeMap {
   constructor(set) {
     this.mapData = set.mapData;
-    this.color = '#006de0';
+    this.color = 'rgba(23,35,93,0.5)';
     this.init();
   }
 
@@ -75,17 +75,17 @@ export default class ThreeMap {
   /**
    * @desc 设置区域颜色
    */
-  setAreaColor(g, color = '#ff0') {
+  setAreaColor(g, color = '#f00') {
     // 恢复颜色
     g.parent.children.forEach(gs => {
       gs.children.forEach(mesh => {
-        mesh.material.color.set(this.color);
+        mesh.material[0].color.set(this.color);
       });
     });
 
     // 设置颜色
     g.children.forEach(mesh => {
-      mesh.material.color.set(color);
+      mesh.material[0].color.set(color);
     });
   }
 
@@ -138,12 +138,12 @@ export default class ThreeMap {
         // 多个面
         if (points[0][0] instanceof Array) {
           points.forEach(p => {
-            const mesh = this.drawModel(p, '#006de0');
+            const mesh = this.drawModel(p, ['rgba(23,35,93,0.5)', 'rgba(166,222,222,0.6)']);
             g.add(mesh);
           });
         } else {
           // 单个面
-          const mesh = this.drawModel(points, '#006de0');
+          const mesh = this.drawModel(points, ['rgba(23,35,93,0.5)', 'rgba(166,222,222,0.6)']);
           g.add(mesh);
         }
       });
@@ -151,7 +151,7 @@ export default class ThreeMap {
     });
 
     this.group = group; // 丢到全局去
-    const lineGroup = this.drawLineGroup(this.mapData.features, 'rgba(74,142,214,1)', 2);
+    const lineGroup = this.drawLineGroup(this.mapData.features, 'rgba(50,255,255,0.6)', 2);
     this.scene.add(lineGroup);
     const lineGroupBottom = this.drawLineGroup(this.mapData.features, 'rgba(0,255,255,0.2)', 1);
     // const lineGroupBottom = lineGroup.clone();
@@ -183,36 +183,6 @@ export default class ThreeMap {
     return lineGroup;
   }
 
-  getRgb(rgbs, n) {
-    let rgb1 = this.rgba2arr(rgbs[0])
-    let rgb2 = this.rgba2arr(rgbs[1])
-    let colors = []
-    for (let i = 0; i < n; i++) {
-      let r = rgb1[0] + ((rgb2[0] - rgb1[0]) / n) * i
-      let g = rgb1[1] + ((rgb2[1] - rgb1[1]) / n) * i
-      let b = rgb1[2] + ((rgb2[2] - rgb1[2]) / n) * i
-      colors.push(r / 255, g / 255, b / 255)
-    }
-
-    return colors;
-  }
-  rgba2arr(color, normalized = false) {
-    let ret = []
-    let colorStr = color.split('(')[1].split(')')[0]
-    if (colorStr) {
-      ret = colorStr.split(',')
-      ret = ret.map(item => {
-        return Number.parseFloat(item, 2)
-      })
-    }
-
-    if (normalized) {
-      ret = ret.map(item => {
-        return (item = +item / 255)
-      })
-    }
-    return ret
-  }
 
   /**
    * @desc 绘制线条
@@ -235,7 +205,7 @@ export default class ThreeMap {
     // const colors = []
     points.forEach(d => {
       const [x, y, z] = d;
-      let point = new THREE.Vector3(x, y, z + 0.1);
+      let point = new THREE.Vector3(x, y, z);
       positions.push(point.x, point.y, point.z);
       // colors.push(1.0, 0.0, 0.0)
       // geometry.vertices.push(new THREE.Vector3(x, y, z + 0.1));
@@ -250,7 +220,7 @@ export default class ThreeMap {
   /**
    * @desc 绘制地图模型 points 是一个二维数组 [[x,y], [x,y], [x,y]]
    */
-  drawModel(points, color) {
+  drawModel(points, colors) {
     const shape = new THREE.Shape();
     points.forEach((d, i) => {
       const [x, y] = d;
@@ -264,17 +234,27 @@ export default class ThreeMap {
     });
 
     const geometry = new THREE.ExtrudeGeometry(shape, {
-      amount: -2,
-      bevelEnabled: false // 对挤出的形状应用是否斜角
+      amount: -1.5, // 拉伸长度，默认100
+      bevelEnabled: false, // 对挤出的形状应用是否斜角
+      bevelSegments: 3
     });
     const material = new THREE.MeshBasicMaterial({
-      color: color,
+      color: colors[0],
       transparent: true,
-      opacity: 0.6,
-      lights: false,
+      opacity: 1,
+      lights: true,
       side: THREE.DoubleSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
     });
-    const mesh = new THREE.Mesh(geometry, material);
+    const material1 = new THREE.MeshPhongMaterial({
+      color: colors[1],
+      emissive: colors[1],
+      emissiveIntensity: 1,
+      transparent: true,
+      lights: true,
+      side: THREE.BackSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
+    });
+    // const mesh = new THREE.Mesh(geometry, [material,material1]);
+    const mesh = new THREE.Mesh(geometry, [material,material1]);
     return mesh;
   }
 

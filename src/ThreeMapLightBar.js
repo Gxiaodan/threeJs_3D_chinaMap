@@ -13,7 +13,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.colors = ['#fff', '#ff0'];
     this.colorIndex = 0;
     this.textures = [new THREE.TextureLoader().load(img1), new THREE.TextureLoader().load(img2)];
-    this.pointsLength = 70;
+    this.pointsLength = 70; // 控制流光速度
   }
 
   // 设置键值
@@ -137,7 +137,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     data.forEach(d => {
       const slnglat = this.dataKeys[d.source.name];
       const tlnglat = this.dataKeys[d.target.name];
-      const z = 10;
+      const z = 20;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
       const [x2, y2, z2] = this.lnglatToMector(tlnglat);
       const curve = new THREE.QuadraticBezierCurve3(
