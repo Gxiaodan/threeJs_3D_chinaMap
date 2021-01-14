@@ -23,6 +23,7 @@ export default class ThreeMap {
    */
   init() {
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color( 0xbfe3dd );
     this.camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 1000);
 
     this.setCamera({ x: 250, y: 0, z: 250 });
@@ -251,9 +252,9 @@ export default class ThreeMap {
       emissiveIntensity: 1,
       transparent: true,
       lights: true,
-      side: THREE.BackSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
+      side: THREE.DoubleSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
     });
-    // const mesh = new THREE.Mesh(geometry, [material,material1]);
+    // const mesh = new THREE.Mesh(geometry, [material]);
     const mesh = new THREE.Mesh(geometry, [material,material1]);
     return mesh;
   }
@@ -315,8 +316,11 @@ export default class ThreeMap {
    * @desc 设置光线
    */
   setLight() {
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    const directionalLight = new THREE.DirectionalLight(0xffff00, 1);
+    directionalLight.castShadow = true;
+    directionalLight.position.set(0, 10, 0);
     this.scene.add(directionalLight);
+    // this.scene.add(new THREE.HemisphereLight(0x443333, 0x000000));
   }
 
   /**
@@ -325,6 +329,7 @@ export default class ThreeMap {
   setRender() {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor( 0xffffff, 0.0 );
     document.body.appendChild(this.renderer.domElement);
   }
 
