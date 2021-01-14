@@ -316,20 +316,36 @@ export default class ThreeMap {
    * @desc 设置光线
    */
   setLight() {
-    const directionalLight = new THREE.DirectionalLight(0xffff00, 1);
-    directionalLight.castShadow = true;
+    const directionalLight = new THREE.DirectionalLight(0xffff00, 1); // 平行光
+    // const directionalLight = new THREE.PointLight( 0xffffff, 1, 0 ); // 点光源
+    directionalLight.castShadow = true; 
     directionalLight.position.set(0, 10, 0);
     this.scene.add(directionalLight);
-    // this.scene.add(new THREE.HemisphereLight(0x443333, 0x000000));
+    // this.scene.add(new THREE.HemisphereLight(0x443333, 0x000000)); // 半球光
+
+    // const spotLight = new THREE.SpotLight( 0xff0000 ); // 聚光灯
+    // spotLight.position.set( 0, 10, 1 );
+
+    // spotLight.castShadow = true;
+
+    // spotLight.shadow.mapSize.width = 1024;
+    // spotLight.shadow.mapSize.height = 1024;
+
+    // spotLight.shadow.camera.near = 500;
+    // spotLight.shadow.camera.far = 4000;
+    // spotLight.shadow.camera.fov = 30;
+
+    // this.scene.add( spotLight );
   }
 
   /**
    * @desc 设置渲染器
    */
   setRender() {
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setClearColor( 0xffffff, 0.0 );
+    // this.renderer.physicallyCorrectLights = true;
     document.body.appendChild(this.renderer.domElement);
   }
 
