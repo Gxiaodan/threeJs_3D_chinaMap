@@ -49,6 +49,11 @@ export default class ThreeMap {
     this.earthLabel.visible = false;
     this.group.add( this.earthLabel );
 
+    this.hoverDiv = document.getElementById('hoverDiv');
+    this.Hoverabel = new CSS2DObject( this.hoverDiv );
+    this.Hoverabel.visible = false;
+    this.group.add( this.Hoverabel );
+
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize( window.innerWidth, window.innerHeight );
     this.labelRenderer.domElement.style.position = 'absolute';
@@ -60,14 +65,16 @@ export default class ThreeMap {
     // this.labelControls.maxDistance = 100;
 
     this.animate();
-    document.body.addEventListener('click', this.mouseEvent.bind(this));
-    // document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this), false );
+    document.body.addEventListener('mouseup', this.mouseEvent.bind(this), false);
+    document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this),false);
   }
 
   /**
    * @desc 鼠标事件处理
    */
   mouseEvent(event) {
+    let type = event.type
+    event.preventDefault();
     if (!this.raycaster) {
       this.raycaster = new THREE.Raycaster();
     }
@@ -93,19 +100,32 @@ export default class ThreeMap {
     // 计算物体和射线的焦点
     this.intersects = this.raycaster.intersectObjects(this.meshes);
     if (this.intersects.length > 0) {
+      this.labelRenderer.domElement.style.display = 'block';
       this.clickFunction(event, this.intersects[0].object.parent);
+    } else {
+      if(type == 'mousemove') {
+        this.Hoverabel.visible = false;
+      } else if (type == 'mouseup') { // 点击时选中信息清空
+        this.labelRenderer.domElement.style.display = 'none';
+        this.earthLabel.visible = false;
+        this.Hoverabel.visible = false;
+        this.clearColor(this.group.children);
+      }
     }
   }
   /**
    * @desc 设置区域颜色
    */
-  setAreaColor(g, color = '#f00') {
-    // 恢复颜色
-    g.parent.children.forEach(gs => {
+  clearColor(group){
+    group.forEach(gs => {
       gs.children.forEach(mesh => {
         mesh.material[0].color.set(this.color);
       });
     });
+  }
+  setAreaColor(g, color = '#f00') {
+    // 恢复颜色
+    this.clearColor(g.parent.children);
 
     // 设置颜色
     g.children.forEach(mesh => {
@@ -113,25 +133,25 @@ export default class ThreeMap {
     });
   }
 
-  setLabelPos(g) {
+  setLabelPos(g, type) {
     // 设置提示框位置
     let name = g.data.properties.name;
     let cpPos = this.lnglatToMector(g.data.properties.cp);
     console.log(name,cpPos,'setPos==')
-    this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
-    // this.earthLabel.element.style.display = 'block';
-    this.earthLabel.visible = true
-    // this.earthDiv.style.display = 'block'
-    console.log(this.earthLabel,'earthLabel==')
+    if(type == 'mouseup') {
+      this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      this.earthLabel.visible = true;
+    } else {
+      this.Hoverabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      this.Hoverabel.visible = true;
+    }
   }
 
   /**
    * @desc 绑定事件
    */
   on(eventName, func) {
-    if (eventName === 'click') {
-      this.clickFunction = func;
-    } else if (eventName === 'mousemove') {
+    if (eventName === 'mouseFn') {
       this.clickFunction = func;
     }
   }
@@ -140,7 +160,7 @@ export default class ThreeMap {
    * @desc 绘制地图
    */
   drawMap() {
-    console.log(this.mapData);
+    // console.log(this.mapData);
     if (!this.mapData) {
       console.error('this.mapData 数据不能是null');
       return;
@@ -165,7 +185,7 @@ export default class ThreeMap {
       });
     });
 
-    console.log(this.mapData);
+    // console.log(this.mapData);
 
     // 绘制地图模型
     const group = new THREE.Group();

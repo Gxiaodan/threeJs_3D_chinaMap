@@ -20,26 +20,18 @@
   <!-- <script src="/assets/plugin/threejs/js/controls/OrbitControls.js"></script> -->
   <script src="/assets/plugin/threejs/js/libs/stats.min.js"></script>
   <link rel="shortcut icon" href="/assets/images/favicon.ico">
-  <style>
-    .label {
-				color: #f00;
-				font-family: sans-serif;
-				padding: 2px;
-				background: rgba( 0, 0, 0, .6 );
-      }
-      #App{
-        overflow: hidden; width: 1382px; height: 764px; position: absolute; top: 0px;
-      }
-  </style>
 </head>
 
 <body>
-  <div id="App" style="position:absolute;">
+  <div id="App">
       <div id="testDiv" >
         <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ name }}</div>
         <br>
         <div>GDP &nbsp;:&nbsp;&nbsp;&nbsp;{{ gdp }}</div>
     </div>
+    <div id="hoverDiv" >
+      <div>省份&nbsp;:&nbsp;&nbsp;&nbsp;{{ name }}</div>
+  </div>
 </div>
 </body>
 

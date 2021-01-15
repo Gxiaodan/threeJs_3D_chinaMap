@@ -47,16 +47,17 @@ const flyDatas = [
 $.get('/assets/map/china.json', d => {
   const mapData = util.decode(d);
   const map = new ThreeMapLightBar({ mapData });
-  map.on('click', (e, g) => {
-    console.log(g);
-    map.setAreaColor(g);
-    map.setLabelPos(g);
+ 
+  map.on('mouseFn', (e, g) => {
+    let type = e.type
+    if(type == 'mousemove') {
+      map.setLabelPos(g, 'mousemove');
+      // map.setAreaColor(g); 
+    } else if (type == 'mouseup') {
+      map.setAreaColor(g);
+      map.setLabelPos(g, 'mouseup');
+    }
   });
-  // map.on('mousemove', (e, g) => {
-  //   console.log(g);
-  //   // map.setLabelPos(g);
-  //   map.setAreaColor(g);
-  // });
 
   // 绘制光柱
   map.drawLightBar(datas);
