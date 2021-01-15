@@ -67,6 +67,16 @@ export default class ThreeMap {
     this.animate();
     document.body.addEventListener('mouseup', this.mouseEvent.bind(this), false);
     document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this),false);
+    document.body.addEventListener( 'mousewheel', this.mousewheel.bind(this),false);
+    
+  }
+
+  // 滚轮事件
+  mousewheel(event) {
+    let type = event.type;
+    console.log(type,'====================')
+    event.preventDefault();
+    this.labelRenderer.domElement.style.display = 'none';
   }
 
   /**
@@ -141,6 +151,7 @@ export default class ThreeMap {
     if(type == 'mouseup') {
       this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
       this.earthLabel.visible = true;
+      console.log(g.data, 'data========')
     } else {
       this.Hoverabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
       this.Hoverabel.visible = true;
