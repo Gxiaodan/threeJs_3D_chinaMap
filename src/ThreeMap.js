@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Line2 } from 'three/examples/jsm/lines/Line2';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 
@@ -35,9 +36,32 @@ export default class ThreeMap {
     this.drawMap();
 
     this.setControl();
-    this.animate();
 
-    document.body.addEventListener('click', this.mouseEvent.bind(this));
+    // 创建div
+    // const earthDiv = document.createElement( 'div' );
+    // earthDiv.className = 'label';
+    // earthDiv.textContent = 'Earth';
+    // earthDiv.style.left = '100px';
+    // earthDiv.style.top = '100px';
+    // 获取页面上div
+    const earthDiv = document.getElementById('testDiv');
+    this.earthLabel = new CSS2DObject( earthDiv );
+    this.earthLabel.position.set( 20, 0, 0 );
+    this.group.add( this.earthLabel );
+
+    this.labelRenderer = new CSS2DRenderer();
+    this.labelRenderer.setSize( window.innerWidth, window.innerHeight );
+    this.labelRenderer.domElement.style.position = 'absolute';
+    this.labelRenderer.domElement.style.top = '0px';
+    document.body.appendChild( this.labelRenderer.domElement );
+    // this.labelControls = new OrbitControls(this.camera, this.labelRenderer.domElement)
+    // this.labelControls.update();
+    // this.labelControls.minDistance = 5;
+    // this.labelControls.maxDistance = 100;
+
+    this.animate();
+    // document.body.addEventListener('click', this.mouseEvent.bind(this));
+    document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this), false );
   }
 
   /**
@@ -63,6 +87,7 @@ export default class ThreeMap {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+    this.earthLabel.position.set( this.mouse.x, this.mouse.y, 0 );
     // 通过摄像机和鼠标位置更新射线
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -72,7 +97,7 @@ export default class ThreeMap {
       this.clickFunction(event, intersects[0].object.parent);
     }
   }
-
+  // labelDiv.style.display = 'block'
   /**
    * @desc 设置区域颜色
    */
@@ -95,6 +120,8 @@ export default class ThreeMap {
    */
   on(eventName, func) {
     if (eventName === 'click') {
+      this.clickFunction = func;
+    } else if (eventName === 'mousemove') {
       this.clickFunction = func;
     }
   }
@@ -151,6 +178,8 @@ export default class ThreeMap {
       group.add(g);
     });
 
+    
+
     this.group = group; // 丢到全局去
     const lineGroup = this.drawLineGroup(this.mapData.features, 'rgba(50,255,255,0.6)', 2);
     this.scene.add(lineGroup);
@@ -158,7 +187,7 @@ export default class ThreeMap {
     // const lineGroupBottom = lineGroup.clone();
     lineGroupBottom.position.z = -2;
     // this.scene.add(lineGroupBottom);
-    this.scene.add(group);
+    this.scene.add(this.group);
   }
 
   /*
@@ -286,9 +315,10 @@ export default class ThreeMap {
 
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
-
+    
     this.renderer.render(this.scene, this.camera);
-
+    this.labelRenderer.render(this.scene, this.camera);
+    // this.labelControls.update();
     this.doAnimate && this.doAnimate.bind(this)();
   }
 
@@ -336,6 +366,7 @@ export default class ThreeMap {
     // spotLight.shadow.camera.fov = 30;
 
     // this.scene.add( spotLight );
+    
   }
 
   /**

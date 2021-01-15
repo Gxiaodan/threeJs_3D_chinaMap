@@ -51,6 +51,10 @@ $.get('/assets/map/china.json', d => {
     console.log(g);
     map.setAreaColor(g);
   });
+  // map.on('mousemove', (e, g) => {
+  //   console.log(g);
+  //   // map.setAreaColor(g);
+  // });
 
   // 绘制光柱
   map.drawLightBar(datas);
