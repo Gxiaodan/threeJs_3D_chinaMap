@@ -15,7 +15,7 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 export default class ThreeMap {
   constructor(set) {
     this.mapData = set.mapData;
-    this.color = 'rgba(23,35,93,0.5)';
+    this.mapColors = ['#006de0', '#006de0'] ;
     this.init();
   }
 
@@ -127,19 +127,33 @@ export default class ThreeMap {
    * @desc 设置区域颜色
    */
   clearColor(group){
+    console.log(this.mapColors)
     group.forEach(gs => {
       gs.children.forEach(mesh => {
-        mesh.material[0].color.set(this.color);
+        if (mesh.material instanceof Array) {
+          mesh.material.forEach((mat, index) => {
+            mat.color.set(this.mapColors[index >= this.mapColors.length ? 0 : index]);
+          })
+        } else {
+          mesh.material.color.set(this.mapColors[0]);
+        }
       });
     });
   }
-  setAreaColor(g, color = '#f00') {
+  setAreaColor(g, colors = ['#f00', '#f00']) {
     // 恢复颜色
     this.clearColor(g.parent.children);
 
     // 设置颜色
     g.children.forEach(mesh => {
-      mesh.material[0].color.set(color);
+      if (mesh.material instanceof Array) {
+        mesh.material.forEach((mat, index) => {
+          mat.color.set(colors[index >= colors.length ? 0 : index]);
+        })
+      } else {
+        mesh.material.color.set(colors[0]);
+      }
+      // mesh.material[0].color.set(color);
     });
   }
 
@@ -207,12 +221,12 @@ export default class ThreeMap {
         // 多个面
         if (points[0][0] instanceof Array) {
           points.forEach(p => {
-            const mesh = this.drawModel(p, ['rgba(23,35,93,0.5)', 'rgba(166,222,222,0.6)']);
+            const mesh = this.drawModel(p, ['#006de0', 'rgba(166,222,222,0.6)']);
             g.add(mesh);
           });
         } else {
           // 单个面
-          const mesh = this.drawModel(points, ['rgba(23,35,93,0.5)', 'rgba(166,222,222,0.6)']);
+          const mesh = this.drawModel(points, ['#006de0', 'rgba(166,222,222,0.6)']);
           g.add(mesh);
         }
       });
@@ -324,7 +338,7 @@ export default class ThreeMap {
       lights: true,
       side: THREE.DoubleSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
     });
-    // const mesh = new THREE.Mesh(geometry, [material]);
+    // const mesh = new THREE.Mesh(geometry, material1);
     const mesh = new THREE.Mesh(geometry, [material,material1]);
     return mesh;
   }
@@ -387,7 +401,7 @@ export default class ThreeMap {
    * @desc 设置光线
    */
   setLight() {
-    const directionalLight = new THREE.DirectionalLight(0xffff00, 1); // 平行光
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // 平行光
     // const directionalLight = new THREE.PointLight( 0xffffff, 1, 0 ); // 点光源
     directionalLight.castShadow = true; 
     directionalLight.position.set(0, 10, 0);
