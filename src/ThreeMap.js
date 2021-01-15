@@ -44,9 +44,9 @@ export default class ThreeMap {
     // earthDiv.style.left = '100px';
     // earthDiv.style.top = '100px';
     // 获取页面上div
-    const earthDiv = document.getElementById('testDiv');
-    this.earthLabel = new CSS2DObject( earthDiv );
-    this.earthLabel.position.set( 20, 0, 0 );
+    this.earthDiv = document.getElementById('testDiv');
+    this.earthLabel = new CSS2DObject( this.earthDiv );
+    this.earthLabel.visible = false;
     this.group.add( this.earthLabel );
 
     this.labelRenderer = new CSS2DRenderer();
@@ -60,8 +60,8 @@ export default class ThreeMap {
     // this.labelControls.maxDistance = 100;
 
     this.animate();
-    // document.body.addEventListener('click', this.mouseEvent.bind(this));
-    document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this), false );
+    document.body.addEventListener('click', this.mouseEvent.bind(this));
+    // document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this), false );
   }
 
   /**
@@ -87,17 +87,15 @@ export default class ThreeMap {
     this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    this.earthLabel.position.set( this.mouse.x, this.mouse.y, 0 );
     // 通过摄像机和鼠标位置更新射线
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     // 计算物体和射线的焦点
-    const intersects = this.raycaster.intersectObjects(this.meshes);
-    if (intersects.length > 0) {
-      this.clickFunction(event, intersects[0].object.parent);
+    this.intersects = this.raycaster.intersectObjects(this.meshes);
+    if (this.intersects.length > 0) {
+      this.clickFunction(event, this.intersects[0].object.parent);
     }
   }
-  // labelDiv.style.display = 'block'
   /**
    * @desc 设置区域颜色
    */
@@ -113,6 +111,18 @@ export default class ThreeMap {
     g.children.forEach(mesh => {
       mesh.material[0].color.set(color);
     });
+  }
+
+  setLabelPos(g) {
+    // 设置提示框位置
+    let name = g.data.properties.name;
+    let cpPos = this.lnglatToMector(g.data.properties.cp);
+    console.log(name,cpPos,'setPos==')
+    this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+    // this.earthLabel.element.style.display = 'block';
+    this.earthLabel.visible = true
+    // this.earthDiv.style.display = 'block'
+    console.log(this.earthLabel,'earthLabel==')
   }
 
   /**

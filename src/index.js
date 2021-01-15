@@ -50,10 +50,12 @@ $.get('/assets/map/china.json', d => {
   map.on('click', (e, g) => {
     console.log(g);
     map.setAreaColor(g);
+    map.setLabelPos(g);
   });
   // map.on('mousemove', (e, g) => {
   //   console.log(g);
-  //   // map.setAreaColor(g);
+  //   // map.setLabelPos(g);
+  //   map.setAreaColor(g);
   // });
 
   // 绘制光柱
