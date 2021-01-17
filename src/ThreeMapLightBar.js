@@ -10,10 +10,10 @@ export default class ThreeMapLightBar extends ThreeMap {
     super(set);
     this.dataKeys = {};
     this.setDataKeys();
-    this.colors = ['#fff', '#ff0'];
+    this.colors = ['#fff', '#ff0', '#0f0'];
     this.colorIndex = 0;
     this.textures = [new THREE.TextureLoader().load(img1), new THREE.TextureLoader().load(img2)];
-    this.pointsLength = 70; // 控制流光速度
+    this.pointsLength = 10; // 控制流光速度;控制飞线分段数量；流光长度等属性
   }
 
   // 设置键值
@@ -35,11 +35,13 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup &&
       this.flyGroup.children.forEach(d => {
         d.geometry.colors = new Array(this.pointsLength).fill(1).map((d, i) => {
-          if (i !== this.colorIndex) {
-            return new THREE.Color('#005fc4');
+          if (i == this.colorIndex) {
+            return new THREE.Color('#ff0');
+          }else if(i == this.colorIndex + 1) {
+            return new THREE.Color('#0f0');
           } else {
-            return new THREE.Color('#00f3ff');
-          }
+            return new THREE.Color('#f00');
+          } 
         });
         d.geometry.colorsNeedUpdate = true;
       });
@@ -148,11 +150,12 @@ export default class ThreeMapLightBar extends ThreeMap {
       const points = curve.getPoints(this.pointsLength);
       const geometry = new THREE.Geometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
       geometry.vertices = points;
-      geometry.colors = new Array(points.length).fill(new THREE.Color('#003670'));
+      geometry.colors = new Array(points.length).fill(new THREE.Color('#f00'));
       const material = new THREE.LineBasicMaterial({
-        vertexColors: THREE.VertexColors,
+        vertexColors: THREE.FaceColors, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        linejoin: 'round'
       });
       const mesh = new THREE.Line(geometry, material);
       group.add(mesh);

@@ -26,7 +26,7 @@ export default class ThreeMap {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color( 0xbfe3dd );
     this.camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 1000);
-
+    this.mousePos = null;
     this.setCamera({ x: 250, y: 0, z: 250 });
     this.setLight();
     this.setRender();
@@ -110,8 +110,9 @@ export default class ThreeMap {
     // 计算物体和射线的焦点
     this.intersects = this.raycaster.intersectObjects(this.meshes);
     if (this.intersects.length > 0) {
+      console.log(this.intersects,'======')
       this.labelRenderer.domElement.style.display = 'block';
-      this.clickFunction(event, this.intersects[0].object.parent);
+      this.clickFunction(event, this.intersects[0].object.parent, this.intersects[0].point);
     } else {
       if(type == 'mousemove') {
         this.Hoverabel.visible = false;
@@ -157,17 +158,22 @@ export default class ThreeMap {
     });
   }
 
-  setLabelPos(g, type) {
+  setLabelPos(g, type, p) {
     // 设置提示框位置
     let name = g.data.properties.name;
-    let cpPos = this.lnglatToMector(g.data.properties.cp);
-    console.log(name,cpPos,'setPos==')
+    // let cpPos = this.lnglatToMector(g.data.properties.cp);
+    let cpPos = p;
+    // console.log(name,cpPos,'setPos==')
     if(type == 'mouseup') {
-      this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      // this.earthLabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      this.earthLabel.position.set( cpPos.x, cpPos.y, cpPos.z);
       this.earthLabel.visible = true;
       console.log(g.data, 'data========')
+      console.log('mouseup========')
     } else {
-      this.Hoverabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      // this.Hoverabel.position.set( cpPos[0],cpPos[1],cpPos[2] );
+      this.Hoverabel.position.set( cpPos.x, cpPos.y, cpPos.z);
+      // this.Hoverabel.position.set( this.mouse.x,this.mouse.y,0 );
       this.Hoverabel.visible = true;
     }
   }

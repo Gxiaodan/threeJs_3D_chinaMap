@@ -48,14 +48,14 @@ $.get('/assets/map/china.json', d => {
   const mapData = util.decode(d);
   const map = new ThreeMapLightBar({ mapData });
  
-  map.on('mouseFn', (e, g) => {
+  map.on('mouseFn', (e, g, p) => {
     let type = e.type
     if(type == 'mousemove') {
-      map.setLabelPos(g, 'mousemove');
+      map.setLabelPos(g, 'mousemove', p);
       // map.setAreaColor(g); 
     } else if (type == 'mouseup') {
       map.setAreaColor(g);
-      map.setLabelPos(g, 'mouseup');
+      map.setLabelPos(g, 'mouseup', p);
     }
   });
 
