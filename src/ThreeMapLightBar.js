@@ -4,6 +4,10 @@ import img2 from './assets/images/lightray_yellow.jpg';
 import throttle from 'lodash.throttle';
 
 import * as THREE from 'three';
+import { Line2 } from 'three/examples/jsm/lines/Line2';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
+
 // const THREE = window.THREE;
 export default class ThreeMapLightBar extends ThreeMap {
   constructor(set) {
@@ -13,7 +17,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.colors = ['#fff', '#ff0', '#0f0'];
     this.colorIndex = 0;
     this.textures = [new THREE.TextureLoader().load(img1), new THREE.TextureLoader().load(img2)];
-    this.pointsLength = 10; // 控制流光速度;控制飞线分段数量；流光长度等属性
+    this.pointsLength = 70; // 控制流光速度;控制飞线分段数量；流光长度等属性
   }
 
   // 设置键值
@@ -31,18 +35,21 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   doAnimate = throttle(() => {
     let ratio = this.colorIndex / this.pointsLength;
-
     this.flyGroup &&
       this.flyGroup.children.forEach(d => {
-        d.geometry.colors = new Array(this.pointsLength).fill(1).map((d, i) => {
+        let colorList = [];
+        new Array(this.pointsLength).fill(1).map((d, i) => {
+          let color = null;
           if (i == this.colorIndex) {
-            return new THREE.Color('#ff0');
+            color = new THREE.Color('#ff0');
           }else if(i == this.colorIndex + 1) {
-            return new THREE.Color('#0f0');
+            color = new THREE.Color('#0f0');
           } else {
-            return new THREE.Color('#f00');
+            color = new THREE.Color('#f00');
           } 
+          colorList.push( color.r, color.g, color.b );
         });
+        d.geometry.setColors(colorList)
         d.geometry.colorsNeedUpdate = true;
       });
 
@@ -148,16 +155,33 @@ export default class ThreeMapLightBar extends ThreeMap {
         new THREE.Vector3(x2, y2, z2)
       );
       const points = curve.getPoints(this.pointsLength);
-      const geometry = new THREE.Geometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
-      geometry.vertices = points;
-      geometry.colors = new Array(points.length).fill(new THREE.Color('#f00'));
-      const material = new THREE.LineBasicMaterial({
-        vertexColors: THREE.FaceColors, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
-        transparent: true,
-        side: THREE.DoubleSide,
-        linejoin: 'round'
+      const geometry = new LineGeometry(); // Geometry 利用 Vector3 或 Color 存储了几何体的相关 attributes
+      // geometry.vertices = points;
+      const positions = [];
+      let colorList = []
+      points.forEach(p => {
+        positions.push(p.x, p.y, p.z);
+       let color = new THREE.Color("#f00");
+        colorList.push( color.r, color.g, color.b );
       });
-      const mesh = new THREE.Line(geometry, material);
+      geometry.setPositions(positions);
+      geometry.setColors(colorList)
+
+      const material = new LineMaterial({
+        dashed: false,
+        color: 0xffffff,
+        vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
+        transparent: true,
+        linewidth: 3,
+        linecap: 'square', // 线两端的样式
+        linejoin: 'round', // 线连接节点的样式
+        // opacity: 1,
+        lights: false, //材质是否受到光照的影响
+        clipShadows: true,
+        shadowSide: THREE.DoubleSide
+      })
+      material.resolution.set(window.innerWidth, window.innerHeight)
+      const mesh = new Line2(geometry, material);
       group.add(mesh);
     });
     this.flyGroup = group;
