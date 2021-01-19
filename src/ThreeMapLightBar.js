@@ -40,21 +40,11 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup &&
       this.flyGroup.children.forEach(d => {
         let colorList = [];
-        // new Array(this.pointsLength).fill(1).map((d, i) => {
-        //   let color = null;
-        //   if (i == this.colorIndex) {
-        //     color = new THREE.Color('#ff0');
-        //   }
-          // else if(i == this.colorIndex + 1) {
-          //   color = new THREE.Color('#0f0');
-          // } else {
-          //   color = new THREE.Color('#f00');
-          // } 
-        //   colorList.push( color.r, color.g, color.b );
-        // });
+        // let value = d.userData.value
+        // let max = d.userData.max
         colorList = util.getRgb(['rgb(245,170,170)', 'rgb(255,0,0)', 'rgb(245,170,170)'], this.pointsLength)
         let color = new THREE.Color('#fff');
-        colorList.splice(this.colorIndex * 3, 6, color.r, color.g, color.b, color.r, color.g, color.b); 
+        colorList.splice(this.colorIndex * 3, 9, color.r, color.g, color.b, color.r, color.g, color.b, color.r, color.g, color.b); 
         d.geometry.setColors(colorList)
         d.geometry.colorsNeedUpdate = true;
       });
@@ -149,9 +139,12 @@ export default class ThreeMapLightBar extends ThreeMap {
    */
   drawFlyLine(data) {
     const group = new THREE.Group();
+    let maxValue = Math.max(...data.map(item => item.value))
     data.forEach(d => {
+      // 源和目标省份的经纬度
       const slnglat = this.dataKeys[d.source.name];
       const tlnglat = this.dataKeys[d.target.name];
+      let value = d.value;
       const z = 15;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
       const [x2, y2, z2] = this.lnglatToMector(tlnglat);
@@ -190,6 +183,8 @@ export default class ThreeMapLightBar extends ThreeMap {
       })
       material.resolution.set(window.innerWidth, window.innerHeight)
       const mesh = new Line2(geometry, material);
+      mesh.userData.value = value;
+      mesh.userData.max = maxValue;
       group.add(mesh);
     });
     this.flyGroup = group;

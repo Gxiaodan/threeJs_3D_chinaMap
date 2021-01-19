@@ -32,16 +32,16 @@ const datas = [
 ];
 
 const flyDatas = [
-  { source: { name: '海南省' }, target: { name: '四川省' } },
-  { source: { name: '北京市' }, target: { name: '四川省' } },
-  { source: { name: '山东省' }, target: { name: '四川省' } },
-  { source: { name: '台湾' }, target: { name: '四川省' } },
-  { source: { name: '黑龙江省' }, target: { name: '四川省' } },
-  { source: { name: '湖北省' }, target: { name: '四川省' } },
-  { source: { name: '内蒙古自治区' }, target: { name: '四川省' } },
-  { source: { name: '西藏自治区' }, target: { name: '四川省' } },
-  { source: { name: '新疆维吾尔自治区' }, target: { name: '四川省' } },
-  { source: { name: '青海省' }, target: { name: '四川省' } }
+  { source: { name: '海南省' }, target: { name: '四川省' }, value: 100 },
+  { source: { name: '北京市' }, target: { name: '四川省' }, value: 150 },
+  { source: { name: '山东省' }, target: { name: '四川省' }, value: 120 },
+  { source: { name: '台湾' }, target: { name: '四川省' }, value: 80 },
+  { source: { name: '黑龙江省' }, target: { name: '四川省' }, value: 40 },
+  { source: { name: '湖北省' }, target: { name: '四川省' }, value: 60 },
+  { source: { name: '内蒙古自治区' }, target: { name: '四川省' }, value: 70 },
+  { source: { name: '西藏自治区' }, target: { name: '四川省' }, value: 10 },
+  { source: { name: '新疆维吾尔自治区' }, target: { name: '四川省' }, value: 200 },
+  { source: { name: '青海省' }, target: { name: '四川省' }, value: 20 }
 ];
 
 $.get('/assets/map/china.json', d => {
