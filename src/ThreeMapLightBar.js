@@ -8,6 +8,8 @@ import { Line2 } from 'three/examples/jsm/lines/Line2';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 
+import { util } from './util';
+
 // const THREE = window.THREE;
 export default class ThreeMapLightBar extends ThreeMap {
   constructor(set) {
@@ -38,17 +40,21 @@ export default class ThreeMapLightBar extends ThreeMap {
     this.flyGroup &&
       this.flyGroup.children.forEach(d => {
         let colorList = [];
-        new Array(this.pointsLength).fill(1).map((d, i) => {
-          let color = null;
-          if (i == this.colorIndex) {
-            color = new THREE.Color('#ff0');
-          }else if(i == this.colorIndex + 1) {
-            color = new THREE.Color('#0f0');
-          } else {
-            color = new THREE.Color('#f00');
-          } 
-          colorList.push( color.r, color.g, color.b );
-        });
+        // new Array(this.pointsLength).fill(1).map((d, i) => {
+        //   let color = null;
+        //   if (i == this.colorIndex) {
+        //     color = new THREE.Color('#ff0');
+        //   }
+          // else if(i == this.colorIndex + 1) {
+          //   color = new THREE.Color('#0f0');
+          // } else {
+          //   color = new THREE.Color('#f00');
+          // } 
+        //   colorList.push( color.r, color.g, color.b );
+        // });
+        colorList = util.getRgb(['rgb(245,170,170)', 'rgb(255,0,0)', 'rgb(245,170,170)'], this.pointsLength)
+        let color = new THREE.Color('#ff0');
+        colorList.splice(this.colorIndex * 3, 3, color.r, color.g, color.b); 
         d.geometry.setColors(colorList)
         d.geometry.colorsNeedUpdate = true;
       });
@@ -146,7 +152,7 @@ export default class ThreeMapLightBar extends ThreeMap {
     data.forEach(d => {
       const slnglat = this.dataKeys[d.source.name];
       const tlnglat = this.dataKeys[d.target.name];
-      const z = 20;
+      const z = 15;
       const [x1, y1, z1] = this.lnglatToMector(slnglat);
       const [x2, y2, z2] = this.lnglatToMector(tlnglat);
       const curve = new THREE.QuadraticBezierCurve3(
@@ -159,26 +165,28 @@ export default class ThreeMapLightBar extends ThreeMap {
       // geometry.vertices = points;
       const positions = [];
       let colorList = []
-      points.forEach(p => {
+      points.forEach((p, i) => {
         positions.push(p.x, p.y, p.z);
-       let color = new THREE.Color("#f00");
-        colorList.push( color.r, color.g, color.b );
+      //  let color = new THREE.Color("#f00");
+        // let color = new THREE.Color(0xffffff);
+        // color.setHSL(p.x / 100 + 0.1, (  p.y * 20 ) / 300, 0.7);
+        // colorList.push( color.r, color.g, color.b );
       });
       geometry.setPositions(positions);
-      geometry.setColors(colorList)
+      geometry.setColors(util.getRgb(['rgb(245,127,127)', 'rgb(255,0,0)', 'rgb(245,127,127)'], this.pointsLength))
 
       const material = new LineMaterial({
         dashed: false,
-        color: 0xffffff,
+        // color: 0xffffff,
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
         linewidth: 3,
         linecap: 'square', // 线两端的样式
         linejoin: 'round', // 线连接节点的样式
-        // opacity: 1,
+        opacity: 1,
         lights: false, //材质是否受到光照的影响
-        clipShadows: true,
-        shadowSide: THREE.DoubleSide
+        // clipShadows: true,
+        // shadowSide: THREE.DoubleSide
       })
       material.resolution.set(window.innerWidth, window.innerHeight)
       const mesh = new Line2(geometry, material);

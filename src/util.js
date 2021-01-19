@@ -56,6 +56,47 @@ class Utils {
     }
     return result;
   }
+  
+  // 飞线等线条渐变色转换方法
+  getRgb(rgbs, n) {
+    let rgb1 = this.rgba2arr(rgbs[0])
+    let rgb2 = this.rgba2arr(rgbs[1])
+    let rgb3 = this.rgba2arr(rgbs[2])
+    let colors = []
+    for (let i = 0; i < n; i++) {
+      let r,g,b;
+      if(i < n / 2) {
+         r = rgb1[0] + ((rgb2[0] - rgb1[0]) / n) * i
+         g = rgb1[1] + ((rgb2[1] - rgb1[1]) / n) * i
+         b = rgb1[2] + ((rgb2[2] - rgb1[2]) / n) * i
+      } else {
+         r = rgb2[0] + ((rgb3[0] - rgb2[0]) / n) * i
+         g = rgb2[1] + ((rgb3[1] - rgb2[1]) / n) * i
+         b = rgb2[2] + ((rgb3[2] - rgb2[2]) / n) * i
+      }
+      colors.push(r / 255, g / 255, b / 255)
+    }
+
+    return colors
+  }
+
+  rgba2arr(color, normalized = false) {
+    let ret = []
+    let colorStr = color.split('(')[1].split(')')[0]
+    if (colorStr) {
+      ret = colorStr.split(',')
+      ret = ret.map(item => {
+        return Number.parseFloat(item, 2)
+      })
+    }
+
+    if (normalized) {
+      ret = ret.map(item => {
+        return (item = +item / 255)
+      })
+    }
+    return ret
+  }
 }
 
 export const util = new Utils();
