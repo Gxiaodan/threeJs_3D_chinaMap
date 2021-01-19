@@ -9,7 +9,7 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
-
+import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
 export default class ThreeMap {
@@ -24,9 +24,10 @@ export default class ThreeMap {
    */
   init() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color( 0xbfe3dd );
+    this.scene.background = new THREE.Color( 0x33338b );
     this.camera = new THREE.PerspectiveCamera(10, window.innerWidth / window.innerHeight, 1, 1000);
     this.mousePos = null;
+    
     this.setCamera({ x: 250, y: 0, z: 250 });
     this.setLight();
     this.setRender();
@@ -196,6 +197,25 @@ export default class ThreeMap {
       console.error('this.mapData 数据不能是null');
       return;
     }
+
+    // 设置镜子
+    let mirGeometry;
+    const WIDTH = window.innerWidth;
+		const HEIGHT = window.innerHeight;
+    // 圆形镜子
+    mirGeometry = new THREE.CircleGeometry( 50, 64 );
+    // 镜子参数
+    const groundMirror = new Reflector( mirGeometry, {
+      clipBias: 0.003,
+      textureWidth: WIDTH * window.devicePixelRatio,
+      textureHeight: HEIGHT * window.devicePixelRatio,
+      color: 0x777777
+    } );
+    groundMirror.position.z = -2;
+    // groundMirror.rotateX( - Math.PI / 2 );
+    // 加入场景
+    this.scene.add( groundMirror );
+
     // 把经纬度转换成x,y,z 坐标
     this.mapData.features.forEach(d => {
       d.vector3 = [];
@@ -244,8 +264,8 @@ export default class ThreeMap {
     this.group = group; // 丢到全局去
     const lineGroup = this.drawLineGroup(this.mapData.features, 'rgba(50,255,255,0.6)', 2);
     this.scene.add(lineGroup);
-    const lineGroupBottom = this.drawLineGroup(this.mapData.features, 'rgba(0,255,255,0.2)', 1);
-    // const lineGroupBottom = lineGroup.clone();
+    // const lineGroupBottom = this.drawLineGroup(this.mapData.features, 'rgba(0,255,255,0.2)', 1);
+    const lineGroupBottom = lineGroup.clone();
     lineGroupBottom.position.z = -2;
     // this.scene.add(lineGroupBottom);
     this.scene.add(this.group);
@@ -325,7 +345,7 @@ export default class ThreeMap {
     });
 
     const geometry = new THREE.ExtrudeGeometry(shape, {
-      amount: -1.5, // 拉伸长度，默认100
+      amount: -2, // 拉伸长度，默认100
       bevelEnabled: false, // 对挤出的形状应用是否斜角
       bevelSegments: 3
     });

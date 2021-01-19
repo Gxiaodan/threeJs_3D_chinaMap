@@ -53,8 +53,8 @@ export default class ThreeMapLightBar extends ThreeMap {
         //   colorList.push( color.r, color.g, color.b );
         // });
         colorList = util.getRgb(['rgb(245,170,170)', 'rgb(255,0,0)', 'rgb(245,170,170)'], this.pointsLength)
-        let color = new THREE.Color('#ff0');
-        colorList.splice(this.colorIndex * 3, 3, color.r, color.g, color.b); 
+        let color = new THREE.Color('#fff');
+        colorList.splice(this.colorIndex * 3, 6, color.r, color.g, color.b, color.r, color.g, color.b); 
         d.geometry.setColors(colorList)
         d.geometry.colorsNeedUpdate = true;
       });
@@ -180,7 +180,7 @@ export default class ThreeMapLightBar extends ThreeMap {
         // color: 0xffffff,
         vertexColors: true, // 是否使用顶点着色 THREE.NoColors THREE.VertexColors THREE.FaceColors
         transparent: true,
-        linewidth: 3,
+        linewidth: 1,
         linecap: 'square', // 线两端的样式
         linejoin: 'round', // 线连接节点的样式
         opacity: 1,
