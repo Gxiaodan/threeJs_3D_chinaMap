@@ -10,6 +10,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
+import lineImg from './assets/images/line.png';
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
 export default class ThreeMap {
@@ -66,6 +67,7 @@ export default class ThreeMap {
     // this.labelControls.maxDistance = 100;
 
     this.animate();
+    // this.lineAnimate()
     document.body.addEventListener('mouseup', this.mouseEvent.bind(this), false);
     document.body.addEventListener( 'mousemove', this.mouseEvent.bind(this),false);
     document.body.addEventListener( 'mousewheel', this.mousewheel.bind(this),false);
@@ -262,7 +264,7 @@ export default class ThreeMap {
     
 
     this.group = group; // 丢到全局去
-    const lineGroup = this.drawLineGroup(this.mapData.features, 'rgba(50,255,255,0.6)', 2);
+    const lineGroup = this.drawLineGroup(this.mapData.features, 'rgb(234,128,58)', 2); // 'rgba(234,128,58,0.3)'
     this.scene.add(lineGroup);
     // const lineGroupBottom = this.drawLineGroup(this.mapData.features, 'rgba(0,255,255,0.2)', 1);
     const lineGroupBottom = lineGroup.clone();
@@ -276,18 +278,30 @@ export default class ThreeMap {
   */
   drawLineGroup(features, color, width){
     const lineGroup = new THREE.Group();
-    features.forEach(d => {
+    this.textureGroup = []
+    features.forEach((d, index) => {
+      
       d.vector3.forEach(points => {
         // 多个面
         if (points[0][0] instanceof Array) {
-          points.forEach(p => {
-            const lineMesh = this.drawLine(p, color, width);
-            lineGroup.add(lineMesh);
-          });
+          let p = points.reduce((pre, current) => {
+            return pre.length > current.length ? pre : current
+          })
+          //let maxLen = Math.max(...points.map(item => item.length))
+          // points.forEach(p => {
+            if(p) {
+              const lineMesh = this.drawLine(p, color, width);
+              lineGroup.add(lineMesh);
+              const lineAniMesh = this.drawLineAnimate(p, width)
+              lineGroup.add(lineAniMesh);
+            }
+          // });
         } else {
           // 单个面
           const lineMesh = this.drawLine(points, color, width);
           lineGroup.add(lineMesh);
+          const lineAniMesh = this.drawLineAnimate(points, width)
+          lineGroup.add(lineAniMesh);
         }
       });
     });
@@ -307,24 +321,49 @@ export default class ThreeMap {
       linewidth: width,
       linecap: 'square', // 线两端的样式
       linejoin: 'round', // 线连接节点的样式
-      // opacity: 1,
-      lights: false //材质是否受到光照的影响
+      lights: false, //材质是否受到光照的影响
+      opacity: 0.2
     });
     material.resolution.set(window.innerWidth, window.innerHeight)
     const geometry = new LineGeometry();
     const positions = [];
-    // const colors = []
     points.forEach(d => {
       const [x, y, z] = d;
       let point = new THREE.Vector3(x, y, z);
       positions.push(point.x, point.y, point.z);
-      // colors.push(1.0, 0.0, 0.0)
-      // geometry.vertices.push(new THREE.Vector3(x, y, z + 0.1));
     });
     geometry.setPositions(positions);
-    // geometry.setColors(this.getRgb([color, color], points.length))
-    // const line = new THREE.Line(geometry, material);
+
     const line = new Line2(geometry, material);
+
+    return line;
+  }
+  drawLineAnimate(points, width) {
+    let texture = new THREE.TextureLoader().load(lineImg)
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping //每个都重复
+    /*
+      水平和垂直方向纹理的包裹方式
+      THREE.RepeatWrapping
+      THREE.ClampToEdgeWrapping
+      THREE.MirroredRepeatWrapping
+    */
+    texture.repeat.set(Math.ceil(points.length / 20), 1)
+    texture.needsUpdate = true
+    this.textureGroup.push(texture)
+    let material = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.BackSide,
+      transparent: true
+    })
+     let pointList = [];
+     points.forEach(d => {
+       const [x, y, z] = d;
+       pointList.push(new THREE.Vector3(x, y, z + 0.1))
+     });
+     let curve = new THREE.CatmullRomCurve3(pointList)
+     const geometry = new THREE.TubeGeometry(curve, Math.ceil(points.length * 1.5), 0.1) // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+     
+     let line = new THREE.Mesh(geometry, material)
     return line;
   }
 
@@ -391,9 +430,18 @@ export default class ThreeMap {
   /**
    * @desc 动画
    */
+  // lineAnimate(){
+  //   // 一定要在此函数中调用
+  //     if(this.texture) this.texture.offset.x -= 0.01
+  //     requestAnimationFrame(this.lineAnimate)
+  // }
   animate() {
+    if(this.textureGroup){
+      this.textureGroup.forEach(texture => {
+        texture.offset.x -= 0.01
+      })
+    }
     requestAnimationFrame(this.animate.bind(this));
-
     // required if controls.enableDamping or controls.autoRotate are set to true
     this.controls.update();
     
