@@ -60,10 +60,10 @@ $.get('/assets/map/china.json', d => {
   });
 
   // 绘制光柱
-  map.drawLightBar(datas);
+  // map.drawLightBar(datas);
 
   // 绘制线条
-  map.drawFlyLine(flyDatas);
+  // map.drawFlyLine(flyDatas);
 
 });
 

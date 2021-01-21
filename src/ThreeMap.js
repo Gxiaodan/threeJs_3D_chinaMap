@@ -11,6 +11,8 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 import lineImg from './assets/images/line.png';
+import meshImg1 from './assets/images/01.jpg';
+import meshImg2 from './assets/images/02.jpg';
 // import { GeometryUtils } from 'three/examples/jsm/utils/GeometryUtils';
 // 初始化一个场景
 export default class ThreeMap {
@@ -30,7 +32,15 @@ export default class ThreeMap {
     this.mousePos = null;
     
     this.setCamera({ x: 250, y: 0, z: 250 });
-    this.setLight();
+    this.cubeCamera1 = new THREE.CubeCamera(0.1, 1000, 2048);
+    this.scene.add(this.cubeCamera1);
+
+    let boxGeometry = new THREE.BoxGeometry(100, 100, 1);
+    let boxMaterial = new THREE.MeshPhongMaterial({envMap: this.cubeCamera1.renderTarget.texture});
+    let box = new THREE.Mesh(boxGeometry, boxMaterial);
+    this.scene.add(this.cubeCamera1);
+
+    // this.setLight();
     this.setRender();
 
     this.setHelper();
@@ -208,12 +218,13 @@ export default class ThreeMap {
     mirGeometry = new THREE.CircleGeometry( 50, 64 );
     // 镜子参数
     const groundMirror = new Reflector( mirGeometry, {
-      clipBias: 0.003,
+      clipBias: 1,
       textureWidth: WIDTH * window.devicePixelRatio,
       textureHeight: HEIGHT * window.devicePixelRatio,
-      color: 0x777777
+      color: 0xcccccc,
+      recursion: 100
     } );
-    groundMirror.position.z = -2;
+    groundMirror.position.z = -4;
     // groundMirror.rotateX( - Math.PI / 2 );
     // 加入场景
     this.scene.add( groundMirror );
@@ -293,7 +304,7 @@ export default class ThreeMap {
               const lineMesh = this.drawLine(p, color, width);
               lineGroup.add(lineMesh);
               const lineAniMesh = this.drawLineAnimate(p, width)
-              lineGroup.add(lineAniMesh);
+              // lineGroup.add(lineAniMesh);
             }
           // });
         } else {
@@ -301,7 +312,7 @@ export default class ThreeMap {
           const lineMesh = this.drawLine(points, color, width);
           lineGroup.add(lineMesh);
           const lineAniMesh = this.drawLineAnimate(points, width)
-          lineGroup.add(lineAniMesh);
+          // lineGroup.add(lineAniMesh);
         }
       });
     });
@@ -361,7 +372,8 @@ export default class ThreeMap {
        pointList.push(new THREE.Vector3(x, y, z + 0.1))
      });
      let curve = new THREE.CatmullRomCurve3(pointList)
-     const geometry = new THREE.TubeGeometry(curve, Math.ceil(points.length * 1.5), 0.1) // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
+     const geometry = new THREE.TubeGeometry(curve, Math.ceil(points.length * 1.5), 0.1, 10, false) 
+     // p1：路径；p2:组成管道的分段数64；p3:管道半径1；p4:管道横截面的分段数8；
      
      let line = new THREE.Mesh(geometry, material)
     return line;
@@ -403,8 +415,15 @@ export default class ThreeMap {
       lights: true,
       side: THREE.DoubleSide // 定义将要渲染哪一面 - 正面FrontSide，背面BackSide或两者DoubleSide
     });
+    // const material1 = new THREE.MeshBasicMaterial({
+    //   map: new THREE.TextureLoader().load(meshImg1),
+    //   // color: "#ffffff",
+    //   transparent: true,
+    //   opacity: 1
+    // })
     // const mesh = new THREE.Mesh(geometry, material1);
     const mesh = new THREE.Mesh(geometry, [material,material1]);
+    // mesh.castShadow = true
     return mesh;
   }
 
@@ -438,7 +457,7 @@ export default class ThreeMap {
   animate() {
     if(this.textureGroup){
       this.textureGroup.forEach(texture => {
-        texture.offset.x -= 0.01
+        texture.offset.x -= 0.03
       })
     }
     requestAnimationFrame(this.animate.bind(this));
@@ -475,15 +494,15 @@ export default class ThreeMap {
    * @desc 设置光线
    */
   setLight() {
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // 平行光
-    // const directionalLight = new THREE.PointLight( 0xffffff, 1, 0 ); // 点光源
+    // const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // 平行光
+    const directionalLight = new THREE.PointLight( 0xffff00, 1, 0 ); // 点光源
     directionalLight.castShadow = true; 
-    directionalLight.position.set(0, 10, 0);
+    directionalLight.position.set(0, 0, 5);
     this.scene.add(directionalLight);
-    // this.scene.add(new THREE.HemisphereLight(0x443333, 0x000000)); // 半球光
+    this.scene.add(new THREE.HemisphereLight(0x443333, 0x000000)); // 半球光
 
-    // const spotLight = new THREE.SpotLight( 0xff0000 ); // 聚光灯
-    // spotLight.position.set( 0, 10, 1 );
+    const spotLight = new THREE.SpotLight( 0xff0000 ); // 聚光灯
+    spotLight.position.set( 0, 10, 1 );
 
     // spotLight.castShadow = true;
 
